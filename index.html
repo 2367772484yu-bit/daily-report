@@ -69,6 +69,18 @@
   }
   .file-status.ok { background: #e2f0e6; color: var(--green); }
   .file-status.err { background: #fbe6e0; color: #c0392b; }
+  .save-btn {
+    height: 36px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--orange);
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .save-btn:hover { background: #d85f22; }
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
   .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
   .kpi .k-label { font-size: 12px; color: var(--ink-soft); }
@@ -129,6 +141,7 @@
         <label>数据同步</label>
         <div class="file-row">
           <span class="file-status" id="fileStatus">加载中...</span>
+          <button class="save-btn" id="saveBtn">导出最新数据上传</button>
         </div>
       </div>
     </div>
@@ -337,12 +350,12 @@
 <script>
 (function () {
   'use strict';
-  var API_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a103eaea4e6f50';
+  var DATA_URL = 'https://raw.githubusercontent.com/2367772484yu-bit/daily-report/main/data.json';
   var db = { dates: {} };
   var fileStatusEl = document.getElementById('fileStatus');
   var dateInput = document.getElementById('dateInput');
   var noteInput = document.getElementById('noteInput');
-  var saveTimer = null;
+  var saveBtn = document.getElementById('saveBtn');
   if (!dateInput.value) {
     var now = new Date();
     dateInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
@@ -452,40 +465,29 @@
       graphic: any ? [] : [{ type: 'text', left: 'center', top: 'middle', style: { text: '填写"完成并发货"数据后自动生成图表', fill: '#9aa4ae', fontSize: 12.5 } }]
     }, { notMerge: true });
   }
-  function saveToCloud() {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(async function() {
-      try {
-        var today = dateInput.value;
-        db.dates[today] = collectData();
-        await fetch(API_URL, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: db })
-        });
-        setStatus('已同步 ' + today + ' 数据', 'ok');
-      } catch(e) {
-        console.log('云端保存失败', e);
-        setStatus('保存失败，请重试', 'err');
-      }
-    }, 800);
-  }
+  saveBtn.addEventListener('click', function() {
+    db.dates[dateInput.value] = collectData();
+    var blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'data.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    setStatus('已导出data.json，拖到GitHub仓库替换即可同步给经理', 'ok');
+  });
   async function loadFromCloud() {
     try {
-      var res = await fetch(API_URL);
+      var res = await fetch(DATA_URL);
       var resObj = await res.json();
-      if (resObj && resObj.data && resObj.data.dates) {
-        db = resObj.data;
-      } else {
-        db = { dates: {} };
-      }
+      if (resObj && resObj.dates) { db = resObj; } else { db = { dates: {} }; }
       var today = dateInput.value;
       if (db.dates[today]) {
         applyData(db.dates[today]);
         setStatus('已加载 ' + today + ' 数据', 'ok');
       } else {
         applyData({});
-        setStatus(today + ' 新一天，填完自动保存', 'ok');
+        setStatus(today + ' 新一天，填完点右上角按钮导出上传', 'ok');
       }
     } catch(e) {
       console.log('云端加载失败', e);
@@ -496,22 +498,18 @@
   document.querySelectorAll('input.cell').forEach(function (inp) {
     inp.addEventListener('input', function () {
       recalc();
-      saveToCloud();
     });
   });
-  noteInput.addEventListener('input', saveToCloud);
+  noteInput.addEventListener('input', recalc);
   dateInput.addEventListener('change', function () {
     var selectedDate = dateInput.value;
-    saveToCloud();
-    setTimeout(function() {
-      if (db.dates[selectedDate]) {
-        applyData(db.dates[selectedDate]);
-        setStatus('已加载 ' + selectedDate + ' 数据', 'ok');
-      } else {
-        applyData({});
-        setStatus(selectedDate + ' 新一天，填完自动保存', 'ok');
-      }
-    }, 500);
+    if (db.dates[selectedDate]) {
+      applyData(db.dates[selectedDate]);
+      setStatus('已加载 ' + selectedDate + ' 数据', 'ok');
+    } else {
+      applyData({});
+      setStatus(selectedDate + ' 新一天，填完点右上角按钮导出上传', 'ok');
+    }
   });
   loadFromCloud();
 })();
