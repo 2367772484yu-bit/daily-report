@@ -491,7 +491,7 @@
 (function () {
   'use strict';
 
-  var API_URL = 'https://api.npoint.io/cf7deb2e3bf9a1717a56';
+  var API_URL = 'https://api.restful-api.dev/objects/ff808181a09d98f701a103eaea4e6f50';
   var db = { dates: {} };
   var fileStatusEl = document.getElementById('fileStatus');
   var dateInput = document.getElementById('dateInput');
@@ -665,7 +665,6 @@
     }, { notMerge: true });
   }
 
-  // 保存到云端
   function saveToCloud() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(async function() {
@@ -675,22 +674,22 @@
         await fetch(API_URL, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(db)
+          body: JSON.stringify({ data: db })
         });
         setStatus('已同步 ' + today + ' 数据', 'ok');
       } catch(e) {
         console.log('云端保存失败', e);
+        setStatus('保存失败，请重试', 'err');
       }
     }, 800);
   }
 
-  // 从云端加载
   async function loadFromCloud() {
     try {
       var res = await fetch(API_URL);
-      var cloudData = await res.json();
-      if (cloudData && cloudData.dates) {
-        db = cloudData;
+      var resObj = await res.json();
+      if (resObj && resObj.data && resObj.data.dates) {
+        db = resObj.data;
       } else {
         db = { dates: {} };
       }
@@ -709,7 +708,6 @@
     }
   }
 
-  // 监听输入变化
   document.querySelectorAll('input.cell').forEach(function (inp) {
     inp.addEventListener('input', function () {
       recalc();
@@ -718,12 +716,9 @@
   });
   noteInput.addEventListener('input', saveToCloud);
 
-  // 换日期
   dateInput.addEventListener('change', function () {
     var selectedDate = dateInput.value;
-    // 先保存当前
     saveToCloud();
-    // 加载新日期
     setTimeout(function() {
       if (db.dates[selectedDate]) {
         applyData(db.dates[selectedDate]);
@@ -735,7 +730,6 @@
     }, 500);
   });
 
-  // 初始化
   loadFromCloud();
 })();
 </script>
