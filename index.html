@@ -458,29 +458,59 @@
       try {
         var today = dateInput.value;
         db.dates[today] = collectData();
-        await fetch(API_URL, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ data: db }) });
+        await fetch(API_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: db })
+        });
         setStatus('已同步 ' + today + ' 数据', 'ok');
-      } catch(e) { console.log('云端保存失败', e); setStatus('保存失败，请重试', 'err'); }
+      } catch(e) {
+        console.log('云端保存失败', e);
+        setStatus('保存失败，请重试', 'err');
+      }
     }, 800);
   }
   async function loadFromCloud() {
     try {
       var res = await fetch(API_URL);
       var resObj = await res.json();
-      if (resObj && resObj.data && resObj.data.dates) { db = resObj.data; } else { db = { dates: {} }; }
+      if (resObj && resObj.data && resObj.data.dates) {
+        db = resObj.data;
+      } else {
+        db = { dates: {} };
+      }
       var today = dateInput.value;
-      if (db.dates[today]) { applyData(db.dates[today]); setStatus('已加载 ' + today + ' 数据', 'ok'); }
-      else { applyData({}); setStatus(today + ' 新一天，填完自动保存', 'ok'); }
-    } catch(e) { console.log('云端加载失败', e); setStatus('云端加载失败，离线模式', 'err'); applyData({}); }
+      if (db.dates[today]) {
+        applyData(db.dates[today]);
+        setStatus('已加载 ' + today + ' 数据', 'ok');
+      } else {
+        applyData({});
+        setStatus(today + ' 新一天，填完自动保存', 'ok');
+      }
+    } catch(e) {
+      console.log('云端加载失败', e);
+      setStatus('云端加载失败，离线模式', 'err');
+      applyData({});
+    }
   }
-  document.querySelectorAll('input.cell').forEach(function (inp) { inp.addEventListener('input', function () { recalc(); saveToCloud(); }); });
+  document.querySelectorAll('input.cell').forEach(function (inp) {
+    inp.addEventListener('input', function () {
+      recalc();
+      saveToCloud();
+    });
+  });
   noteInput.addEventListener('input', saveToCloud);
   dateInput.addEventListener('change', function () {
     var selectedDate = dateInput.value;
     saveToCloud();
     setTimeout(function() {
-      if (db.dates[selectedDate]) { applyData(db.dates[selectedDate]); setStatus('已加载 ' + selectedDate + ' 数据', 'ok'); }
-      else { applyData({}); setStatus(selectedDate + ' 新一天，填完自动保存', 'ok'); }
+      if (db.dates[selectedDate]) {
+        applyData(db.dates[selectedDate]);
+        setStatus('已加载 ' + selectedDate + ' 数据', 'ok');
+      } else {
+        applyData({});
+        setStatus(selectedDate + ' 新一天，填完自动保存', 'ok');
+      }
     }, 500);
   });
   loadFromCloud();
