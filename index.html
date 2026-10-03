@@ -69,6 +69,18 @@
   }
   .file-status.ok { background: #e2f0e6; color: var(--green); }
   .file-status.err { background: #fbe6e0; color: #c0392b; }
+  .save-btn {
+    height: 36px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--orange);
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .save-btn:hover { background: #d85f22; }
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
   .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
   .kpi .k-label { font-size: 12px; color: var(--ink-soft); }
@@ -129,6 +141,7 @@
         <label>数据同步</label>
         <div class="file-row">
           <span class="file-status" id="fileStatus">加载中...</span>
+          <button class="save-btn" id="saveBtn">导出最新数据上传</button>
         </div>
       </div>
     </div>
