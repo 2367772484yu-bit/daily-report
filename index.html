@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>仓库工作日报</title>
+<style>
+  :root {
+    --ink: #1c2733;
+    --ink-soft: #5b6b7a;
+    --paper: #f4f3ee;
+    --card: #ffffff;
+    --line: #dfdcd4;
+    --blue: #156082;
+    --orange: #E97132;
+    --green: #2e7d4f;
+    --c-y: #fff4cc;
+    --c-g: #f1f1ee;
+    --c-grn: #dceade;
+    --c-bg: #e2ecf0;
+    --c-or: #fbe3d5;
+    --c-gy: #F2F2F2;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 20px 16px 48px;
+  }
+  .wrap { max-width: 1500px; margin: 0 auto; }
+  .app-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .app-head h1 { font-size: 21px; font-weight: 800; letter-spacing: 1px; color: var(--ink); }
+  .app-head .sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .date-controls { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label { font-size: 11.5px; color: var(--ink-soft); font-weight: 600; }
+  .field input[type="date"],
+  .field select {
+    height: 36px;
+    border: 1px solid #cfcbc1;
+    border-radius: 8px;
+    padding: 0 10px;
+    font: inherit;
+    background: #fff;
+    color: var(--ink);
+    outline: none;
+  }
+  .file-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .file-status {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 20px;
+    background: #ecebe5;
+    color: var(--ink-soft);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .file-status.ok { background: #e2f0e6; color: var(--green); }
+  .file-status.err { background: #fbe6e0; color: #c0392b; }
+  .btn {
+    height: 36px;
+    border: 1px solid var(--blue);
+    background: var(--blue);
+    color: #fff;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 0 14px;
+    cursor: pointer;
+    outline: none;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn-ghost { background: #fff; color: var(--blue); }
+  .btn-green { background: #2e7d4f; border-color: #2e7d4f; }
+  .fallback-row { display: flex; gap: 8px; margin: 4px 0 0; }
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .kpi .k-label { font-size: 12px; color: var(--ink-soft); }
+  .kpi .k-value { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .kpi .k-sub { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .kpi.k-blue .k-value { color: var(--blue); }
+  .kpi.k-orange .k-value { color: var(--orange); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(28,39,51,.04);
+  }
+  .card h2 {
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6a7180;
+    background: #efeee9;
+    border-radius: 20px;
+    padding: 2px 9px;
+  }
+  .table-scroll { overflow-x: auto; }
+  table.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  table.tbl th {
+    background: #f7f6f1;
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--ink);
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.tbl td {
+    border: 1px solid var(--line);
+    padding: 6px 8px;
+    text-align: center;
+  }
+  table.tbl td.row-name {
+    text-align: left;
+    font-weight: 600;
+    background: #fbfaf6;
+    white-space: nowrap;
+  }
+  .grp-y  { background: var(--c-y) !important; }
+  .grp-g  { background: var(--c-g) !important; }
+  .grp-grn{ background: var(--c-grn) !important; }
+  .grp-bg { background: var(--c-bg) !important; }
+  .num-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+  .num-wrap .unit {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10.5px;
+    color: #8a93a0;
+    pointer-events: none;
+  }
+  input.cell {
+    width: 100%;
+    min-width: 54px;
+    height: 30px;
+    border: 1px solid transparent;
+    background: transparent;
+    text-align: center;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    padding: 3px 18px 3px 4px;
+    border-radius: 5px;
+    outline: none;
+  }
+  input.cell:hover { border-color: #cfcbc1; }
+  input.cell:focus {
+    border-color: var(--blue);
+    background: #f4f9fc;
+  }
+  .cell-out {
+    display: inline-block;
+    min-width: 54px;
+    height: 30px;
+    line-height: 30px;
+    font-weight: 800;
+    border-radius: 5px;
+    background: #f2f1ec;
+    padding: 0 8px;
+  }
+  .cell-out.pct { color: var(--blue); }
+  .lk-rows { display: flex; flex-direction: column; gap: 8px; }
+  .lk-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: var(--c-grn);
+    border: 1px solid #c6dcc9;
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+  .lk-row .r-label { font-weight: 700; font-size: 13px; }
+  .lk-row .r-sub { font-size: 11.5px; color: #4d6a52; margin-left: auto; }
+  .pair { display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
+  .table-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .table-block { min-width: 0; background: #fafaf7; border-radius: 10px; padding: 14px 16px; border: 1px solid var(--line); }
+  .table-block-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-left: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .table-block-title::before {
+    content: "";
+    width: 4px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--blue);
+  }
+  .completion-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 18px;
+    align-items: stretch;
+  }
+  #completionChart { width: 100%; height: 280px; }
+  .chart-box { border: 1px solid var(--line); border-radius: 10px; padding: 10px 8px 6px; background: #fdfcfa; }
+  .note-bar {
+    margin-top: 14px;
+    background: var(--c-gy);
+    border: 1px dashed #d8d2c4;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #FA7D00;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .note-bar input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: #FA7D00;
+    font-weight: 700;
+    outline: none;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app-head">
+    <div>
+      <h1>仓库工作日报</h1>
+      <div class="sub">收发记录 · 理库状态 · 发货完成度</div>
+    </div>
+    <div class="date-controls">
+      <div class="field">
+        <label for="dateInput">日报日期</label>
+        <input type="date" id="dateInput">
+      </div>
+      <div class="field">
+        <label>数据同步</label>
+        <div class="file-row">
+          <span class="file-status" id="fileStatus">加载中...</span>
+        </div>
+        <div class="fallback-row">
+          <button type="button" class="btn btn-green" id="btnShare">生成分享链接</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="kpis">
+    <div class="kpi k-blue">
+      <div class="k-label">快递 · 完成度</div>
+      <div class="k-value" id="kpiExpress">—</div>
+      <div class="k-sub" id="kpiExpressSub">未填写数据</div>
+    </div>
+    <div class="kpi k-orange">
+      <div class="k-label">卡车 · 完成度</div>
+      <div class="k-value" id="kpiTruck">—</div>
+      <div class="k-sub" id="kpiTruckSub">未填写数据</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">待上架（托）</div>
+      <div class="k-value" id="kpiShelf">0</div>
+      <div class="k-sub">= 早柜 + 到柜 − 上架</div>
+    </div>
+    <div class="kpi">
+      <div class="k-label">今日发货一共（单）</div>
+      <div class="k-value" id="kpiShip">0</div>
+      <div class="k-sub">快递 + 卡车</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>收发记录 <span class="tag">快递 · DSV · GEL</span></h2>
+    <div class="table-grid">
+      <div class="table-block">
+        <h3 class="table-block-title">快递</h3>
+        <div class="table-scroll">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th style="background:transparent;"></th>
+                <th class="grp-y">快递 DPD<span class="colnote">（托）</span></th>
+                <th class="grp-y">快递 DHL<span class="colnote">（笼）</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="row-name">出：（托）</td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B4"><span class="unit">托</span></div></td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C4"><span class="unit">笼</span></div></td>
+              </tr>
+              <tr>
+                <td class="row-name">回：</td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B5"><span class="unit">托</span></div></td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C5"><span class="unit">笼</span></div></td>
+              </tr>
+              <tr>
+                <td class="row-name">预计要明天（托）</td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B7"><span class="unit">托</span></div></td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C7"><span class="unit">笼</span></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-block">
+        <h3 class="table-block-title">卡车 DSV</h3>
+        <div class="table-scroll">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th class="grp-g">卡车 DSV<span class="colnote">（托）</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E4"><span class="unit">托</span></div></td></tr>
+              <tr><td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E5"><span class="unit">托</span></div></td></tr>
+              <tr><td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E6"><span class="unit">托</span></div></td></tr>
+              <tr><td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E7"><span class="unit">托</span></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="table-block">
+        <h3 class="table-block-title">卡车 GEL</h3>
+        <div class="table-scroll">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th class="grp-g">卡车 GEL<span class="colnote">（托）</span></th>
+                <th class="grp-g">卡车 GEL<span class="colnote">（件）</span></th>
+                <th>单位说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G4T"><span class="unit">托</span></div></td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G4"><span class="unit">件</span></div></td>
+                <td>GEL loose-Light</td>
+              </tr>
+              <tr>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G5T"><span class="unit">托</span></div></td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G5"><span class="unit">件</span></div></td>
+                <td>GEL ROC</td>
+              </tr>
+              <tr>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G6"><span class="unit">托</span></div></td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G6P"><span class="unit">件</span></div></td>
+                <td>GEL Pallet</td>
+              </tr>
+              <tr>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G7"><span class="unit">托</span></div></td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G7P"><span class="unit">件</span></div></td>
+                <td>GEL Loose-heavy</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>退件处理 <span class="tag">个</span></h2>
+    <div class="lk-row grp-bg">
+      <span class="r-label">退件处理</span>
+      <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L8"> 个</span>
+      <span class="pair" style="margin-left:auto"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="M8"> 个</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>理库状态 <span class="tag">排 → 托 自动换算</span></h2>
+    <div class="lk-rows">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="lk-row">
+          <span class="r-label">理库状态</span>
+          <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K3"></span>
+          <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L3" value="13">托</span>
+          <span class="r-sub">一共 <span class="cell-out" data-out="M3">0</span> 托</span>
+        </div>
+        <div class="lk-row">
+          <span class="r-label">上架数量</span>
+          <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K5"></span>
+          <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L5" value="13">托</span>
+          <span class="r-sub">一共 <span class="cell-out" data-out="M5">0</span> 托</span>
+        </div>
+      </div>
+      <div style="border:1px solid #c6dcc9; border-radius:8px; padding:12px; background:#f4f9f5;">
+        <div class="lk-row" style="background:transparent; border:none;">
+          <span class="r-label">待上架</span>
+          <span class="pair"><span class="cell-out" data-out="L9">0</span> 个</span>
+          <span class="r-sub">一共（托）<span class="cell-out" data-out="O9">0</span></span>
+        </div>
+        <div class="lk-row" style="background:transparent; border:none;">
+          <span class="r-label">到柜</span>
+          <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L10"> 个</span>
+          <span class="r-sub">一共（托）<span class="cell-out" data-out="O10">0</span></span>
+        </div>
+        <div class="lk-row" style="background:transparent; border:none;">
+          <span class="r-label">截至今日早的柜的数量</span>
+          <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L11" value="0"> 个</span>
+          <span class="r-sub">一共（托）<span class="cell-out" data-out="O11">0</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>发货完成度 <span class="tag">自动计算</span></h2>
+    <div class="completion-grid">
+      <div class="table-scroll">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>类别</th>
+              <th>待拣货（单）</th>
+              <th>完成并发货（单）</th>
+              <th>待复核</th>
+              <th>一共</th>
+              <th>完成度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-name">快递</td>
+              <td class="grp-bg"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B20"></div></td>
+              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C20"></div></td>
+              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="D20"></div></td>
+              <td><span class="cell-out" data-out="E20">0</span></td>
+              <td><span class="cell-out pct" data-out="F20">—</span></td>
+            </tr>
+            <tr>
+              <td class="row-name">卡车</td>
+              <td class="grp-bg"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B22"></div></td>
+              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C22"></div></td>
+              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="D22"></div></td>
+              <td><span class="cell-out" data-out="E22">0</span></td>
+              <td><span class="cell-out pct" data-out="F22">—</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="note-bar">
+      <span>备注</span>
+      <input type="text" id="noteInput" placeholder="今日备注…">
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var db = {};
+  var API_URL = 'https://api.npoint.io/cf7deb2e3bf9a1717a56';
+  var fileStatusEl = document.getElementById('fileStatus');
+  var dateInput = document.getElementById('dateInput');
+  var noteInput = document.getElementById('noteInput');
+
+  if (!dateInput.value) {
+    var now = new Date();
+    dateInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+  }
+
+  function setStatus(text, cls) {
+    fileStatusEl.textContent = text;
+    fileStatusEl.className = 'file-status' + (cls ? ' ' + cls : '');
+  }
+
+  function num(key) {
+    var el = document.querySelector('input.cell[data-key="' + key + '"]');
+    if (!el) return 0;
+    var v = parseFloat(el.value);
+    return isNaN(v) ? 0 : v;
+  }
+  function setOut(key, value, isPct) {
+    var el = document.querySelector('.cell-out[data-out="' + key + '"]');
+    if (!el) return;
+    if (isPct && (!value || value <= 0 || isNaN(value))) {
+      el.innerHTML = '<span class="na">—</span>';
+      return;
+    }
+    el.textContent = value;
+  }
+  function pctOf(part, total) {
+    if (!total || total <= 0) return null;
+    var p = part / total * 100;
+    return p % 1 === 0 ? p.toFixed(0) : p.toFixed(1);
+  }
+
+  function recalc() {
+    var K3 = num('K3'), L3 = num('L3');
+    setOut('M3', K3 * L3);
+    var K5 = num('K5'), L5 = num('L5');
+    setOut('M5', K5 * L5);
+    var L10 = num('L10'), L11 = num('L11');
+    var l9 = L11 + L10 - K5;
+    setOut('L9', l9);
+    setOut('O9', l9 * L5);
+    setOut('O10', L10 * L5);
+    setOut('O11', L11 * L5);
+    var e20 = num('B20') + num('C20') + num('D20');
+    setOut('E20', e20);
+    setOut('F20', pctOf(num('C20'), e20), true);
+    var e22 = num('B22') + num('C22') + num('D22');
+    setOut('E22', e22);
+    setOut('F22', pctOf(num('C22'), e22), true);
+    updateKpis();
+  }
+
+  function updateKpis() {
+    var c20 = num('C20'), e20 = num('B20') + c20 + num('D20');
+    var c22 = num('C22'), e22 = num('B22') + c22 + num('D22');
+    var f20 = pctOf(c20, e20);
+    var f22 = pctOf(c22, e22);
+    var kEx = document.getElementById('kpiExpress');
+    var kExS = document.getElementById('kpiExpressSub');
+    var kTr = document.getElementById('kpiTruck');
+    var kTrS = document.getElementById('kpiTruckSub');
+    if (f20 === null) { kEx.textContent = '—'; kExS.textContent = '未填写数据'; }
+    else { kEx.textContent = f20 + '%'; kExS.textContent = '完成 ' + c20 + ' / 一共 ' + e20 + ' 单'; }
+    if (f22 === null) { kTr.textContent = '—'; kTrS.textContent = '未填写数据'; }
+    else { kTr.textContent = f22 + '%'; kTrS.textContent = '完成 ' + c22 + ' / 一共 ' + e22 + ' 单'; }
+    document.getElementById('kpiShelf').textContent = num('L9') * num('L5');
+    document.getElementById('kpiShip').textContent = e20 + e22;
+  }
+
+  function collectData() {
+    var data = {};
+    document.querySelectorAll('input.cell').forEach(function (inp) {
+      data[inp.getAttribute('data-key')] = inp.value;
+    });
+    data['H21'] = noteInput.value;
+    return data;
+  }
+
+  function applyData(data) {
+    data = data || {};
+    document.querySelectorAll('input.cell').forEach(function (inp) {
+      var k = inp.getAttribute('data-key');
+      if (data[k] !== undefined) { inp.value = data[k]; }
+      else if (k === 'L3' || k === 'L5') { inp.value = '13'; }
+      else if (k === 'L11') { inp.value = '0'; }
+      else { inp.value = ''; }
+    });
+    noteInput.value = data['H21'] !== undefined ? data['H21'] : '';
+    recalc();
+  }
+
+  var saveTimer = null;
+  function saveToCloud() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async function() {
+      try {
+        await fetch(API_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(collectData())
+        });
+        setStatus('已自动同步到云端', 'ok');
+      } catch(e) {
+        console.log('保存失败', e);
+      }
+    }, 1000);
+  }
+
+  async function loadFromCloud() {
+    try {
+      var res = await fetch(API_URL);
+      var cloudData = await res.json();
+      if (cloudData && Object.keys(cloudData).length > 0) {
+        applyData(cloudData);
+        setStatus('已从云端加载最新数据', 'ok');
+      } else {
+        setStatus('空白，填完自动保存', 'ok');
+      }
+    } catch(e) {
+      setStatus('云端加载失败，离线模式', 'err');
+    }
+  }
+
+  document.querySelectorAll('input.cell').forEach(function (inp) {
+    inp.addEventListener('input', function () {
+      recalc();
+      saveToCloud();
+    });
+  });
+  noteInput.addEventListener('input', saveToCloud);
+
+  document.getElementById('btnShare').addEventListener('click', function() {
+    var dataStr = JSON.stringify(collectData());
+    var encoded = btoa(unescape(encodeURIComponent(dataStr)));
+    var shareUrl = window.location.href.split('#')[0] + '#data=' + encoded;
+    navigator.clipboard.writeText(shareUrl).then(function() {
+      alert('分享链接已复制！发给领导就行');
+    }).catch(function() {
+      prompt('复制这个链接发给领导：', shareUrl);
+    });
+  });
+
+  if (window.location.hash.includes('data=')) {
+    var encoded = window.location.hash.split('data=')[1];
+    try {
+      var decoded = decodeURIComponent(escape(atob(encoded)));
+      applyData(JSON.parse(decoded));
+      setStatus('已加载分享数据（只读）', 'ok');
+    } catch(e) {}
+  } else {
+    loadFromCloud();
+  }
+
+  recalc();
+})();
+</script>
+</body>
+</html>
