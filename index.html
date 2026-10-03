@@ -44,8 +44,7 @@
   .date-controls { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
   .field { display: flex; flex-direction: column; gap: 4px; }
   .field label { font-size: 11.5px; color: var(--ink-soft); font-weight: 600; }
-  .field input[type="date"],
-  .field select {
+  .field input[type="date"] {
     height: 36px;
     border: 1px solid #cfcbc1;
     border-radius: 8px;
@@ -63,30 +62,14 @@
     border-radius: 20px;
     background: #ecebe5;
     color: var(--ink-soft);
-    max-width: 220px;
+    max-width: 240px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .file-status.ok { background: #e2f0e6; color: var(--green); }
   .file-status.err { background: #fbe6e0; color: #c0392b; }
-  .btn {
-    height: 36px;
-    border: 1px solid var(--blue);
-    background: var(--blue);
-    color: #fff;
-    font: inherit;
-    font-size: 12.5px;
-    font-weight: 700;
-    border-radius: 8px;
-    padding: 0 14px;
-    cursor: pointer;
-    outline: none;
-  }
-  .btn:hover { filter: brightness(1.08); }
-  .btn-ghost { background: #fff; color: var(--blue); }
-  .btn-green { background: #2e7d4f; border-color: #2e7d4f; }
-  .fallback-row { display: flex; gap: 8px; margin: 4px 0 0; }
+
   .kpis {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -104,6 +87,7 @@
   .kpi .k-sub { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
   .kpi.k-blue .k-value { color: var(--blue); }
   .kpi.k-orange .k-value { color: var(--orange); }
+
   .card {
     background: var(--card);
     border: 1px solid var(--line);
@@ -128,6 +112,7 @@
     border-radius: 20px;
     padding: 2px 9px;
   }
+
   .table-scroll { overflow-x: auto; }
   table.tbl {
     width: 100%;
@@ -158,6 +143,8 @@
   .grp-g  { background: var(--c-g) !important; }
   .grp-grn{ background: var(--c-grn) !important; }
   .grp-bg { background: var(--c-bg) !important; }
+  .grp-or { background: var(--c-or) !important; }
+
   .num-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
   .num-wrap .unit {
     position: absolute;
@@ -198,7 +185,7 @@
     padding: 0 8px;
   }
   .cell-out.pct { color: var(--blue); }
-  .lk-rows { display: flex; flex-direction: column; gap: 8px; }
+
   .lk-row {
     display: flex;
     align-items: center;
@@ -212,6 +199,7 @@
   .lk-row .r-label { font-weight: 700; font-size: 13px; }
   .lk-row .r-sub { font-size: 11.5px; color: #4d6a52; margin-left: auto; }
   .pair { display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
+
   .table-grid {
     display: flex;
     flex-direction: column;
@@ -235,6 +223,9 @@
     border-radius: 2px;
     background: var(--blue);
   }
+  .table-block:nth-child(2) .table-block-title::before { background: var(--orange); }
+  .table-block:nth-child(3) .table-block-title::before { background: var(--green); }
+
   .completion-grid {
     display: grid;
     grid-template-columns: 1.1fr 1fr;
@@ -284,9 +275,6 @@
         <div class="file-row">
           <span class="file-status" id="fileStatus">加载中...</span>
         </div>
-        <div class="fallback-row">
-          <button type="button" class="btn btn-green" id="btnShare">生成分享链接</button>
-        </div>
       </div>
     </div>
   </header>
@@ -324,8 +312,8 @@
             <thead>
               <tr>
                 <th style="background:transparent;"></th>
-                <th class="grp-y">快递 DPD<span class="colnote">（托）</span></th>
-                <th class="grp-y">快递 DHL<span class="colnote">（笼）</span></th>
+                <th class="grp-y">快递 DPD<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（托）</span></th>
+                <th class="grp-y">快递 DHL<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（笼）</span></th>
               </tr>
             </thead>
             <tbody>
@@ -340,7 +328,7 @@
                 <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C5"><span class="unit">笼</span></div></td>
               </tr>
               <tr>
-                <td class="row-name">预计要明天（托）</td>
+                <td class="row-name">预计要明天 （托）</td>
                 <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B7"><span class="unit">托</span></div></td>
                 <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C7"><span class="unit">笼</span></div></td>
               </tr>
@@ -352,10 +340,10 @@
       <div class="table-block">
         <h3 class="table-block-title">卡车 DSV</h3>
         <div class="table-scroll">
-          <table class="tbl">
+          <table class="tbl" style="width:auto;min-width:300px;margin-right:auto;">
             <thead>
               <tr>
-                <th class="grp-g">卡车 DSV<span class="colnote">（托）</span></th>
+                <th class="grp-g">卡车 DSV<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（托）</span></th>
               </tr>
             </thead>
             <tbody>
@@ -374,8 +362,8 @@
           <table class="tbl">
             <thead>
               <tr>
-                <th class="grp-g">卡车 GEL<span class="colnote">（托）</span></th>
-                <th class="grp-g">卡车 GEL<span class="colnote">（件）</span></th>
+                <th class="grp-g">卡车 GEL<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（托）</span></th>
+                <th class="grp-g">卡车 GEL<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（件）</span></th>
                 <th>单位说明</th>
               </tr>
             </thead>
@@ -418,37 +406,35 @@
 
   <section class="card">
     <h2>理库状态 <span class="tag">排 → 托 自动换算</span></h2>
-    <div class="lk-rows">
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-        <div class="lk-row">
-          <span class="r-label">理库状态</span>
-          <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K3"></span>
-          <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L3" value="13">托</span>
-          <span class="r-sub">一共 <span class="cell-out" data-out="M3">0</span> 托</span>
-        </div>
-        <div class="lk-row">
-          <span class="r-label">上架数量</span>
-          <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K5"></span>
-          <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L5" value="13">托</span>
-          <span class="r-sub">一共 <span class="cell-out" data-out="M5">0</span> 托</span>
-        </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+      <div class="lk-row">
+        <span class="r-label">理库状态</span>
+        <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K3"></span>
+        <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L3" value="13">托</span>
+        <span class="r-sub">一共 <span class="cell-out" data-out="M3">0</span> 托</span>
       </div>
-      <div style="border:1px solid #c6dcc9; border-radius:8px; padding:12px; background:#f4f9f5;">
-        <div class="lk-row" style="background:transparent; border:none;">
-          <span class="r-label">待上架</span>
-          <span class="pair"><span class="cell-out" data-out="L9">0</span> 个</span>
-          <span class="r-sub">一共（托）<span class="cell-out" data-out="O9">0</span></span>
-        </div>
-        <div class="lk-row" style="background:transparent; border:none;">
-          <span class="r-label">到柜</span>
-          <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L10"> 个</span>
-          <span class="r-sub">一共（托）<span class="cell-out" data-out="O10">0</span></span>
-        </div>
-        <div class="lk-row" style="background:transparent; border:none;">
-          <span class="r-label">截至今日早的柜的数量</span>
-          <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L11" value="0"> 个</span>
-          <span class="r-sub">一共（托）<span class="cell-out" data-out="O11">0</span></span>
-        </div>
+      <div class="lk-row">
+        <span class="r-label">上架数量</span>
+        <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K5"></span>
+        <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L5" value="13">托</span>
+        <span class="r-sub">一共 <span class="cell-out" data-out="M5">0</span> 托</span>
+      </div>
+    </div>
+    <div style="border:1px solid #c6dcc9; border-radius:8px; padding:12px; background:#f4f9f5;">
+      <div class="lk-row" style="background:transparent;border:none;">
+        <span class="r-label">待上架</span>
+        <span class="pair"><span class="cell-out" data-out="L9">0</span> 个</span>
+        <span class="r-sub">一共（托）<span class="cell-out" data-out="O9">0</span></span>
+      </div>
+      <div class="lk-row" style="background:transparent;border:none;">
+        <span class="r-label">到柜</span>
+        <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L10"> 个</span>
+        <span class="r-sub">一共（托）<span class="cell-out" data-out="O10">0</span></span>
+      </div>
+      <div class="lk-row" style="background:transparent;border:none;">
+        <span class="r-label">截至今日早的柜的数量</span>
+        <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L11" value="0"> 个</span>
+        <span class="r-sub">一共（托）<span class="cell-out" data-out="O11">0</span></span>
       </div>
     </div>
   </section>
@@ -488,6 +474,10 @@
           </tbody>
         </table>
       </div>
+      <div class="chart-box">
+        <div style="font-size:12.5px;font-weight:700;color:#5b6b7a;text-align:center;margin-bottom:4px;">完成度 = 完成并发货 ÷ 一共</div>
+        <div id="completionChart"></div>
+      </div>
     </div>
     <div class="note-bar">
       <span>备注</span>
@@ -500,11 +490,13 @@
 <script>
 (function () {
   'use strict';
-  var db = {};
+
   var API_URL = 'https://api.npoint.io/cf7deb2e3bf9a1717a56';
+  var db = { dates: {} };
   var fileStatusEl = document.getElementById('fileStatus');
   var dateInput = document.getElementById('dateInput');
   var noteInput = document.getElementById('noteInput');
+  var saveTimer = null;
 
   if (!dateInput.value) {
     var now = new Date();
@@ -526,7 +518,7 @@
     var el = document.querySelector('.cell-out[data-out="' + key + '"]');
     if (!el) return;
     if (isPct && (!value || value <= 0 || isNaN(value))) {
-      el.innerHTML = '<span class="na">—</span>';
+      el.innerHTML = '<span style="color:#a5acb4;font-weight:400;">—</span>';
       return;
     }
     el.textContent = value;
@@ -535,43 +527,6 @@
     if (!total || total <= 0) return null;
     var p = part / total * 100;
     return p % 1 === 0 ? p.toFixed(0) : p.toFixed(1);
-  }
-
-  function recalc() {
-    var K3 = num('K3'), L3 = num('L3');
-    setOut('M3', K3 * L3);
-    var K5 = num('K5'), L5 = num('L5');
-    setOut('M5', K5 * L5);
-    var L10 = num('L10'), L11 = num('L11');
-    var l9 = L11 + L10 - K5;
-    setOut('L9', l9);
-    setOut('O9', l9 * L5);
-    setOut('O10', L10 * L5);
-    setOut('O11', L11 * L5);
-    var e20 = num('B20') + num('C20') + num('D20');
-    setOut('E20', e20);
-    setOut('F20', pctOf(num('C20'), e20), true);
-    var e22 = num('B22') + num('C22') + num('D22');
-    setOut('E22', e22);
-    setOut('F22', pctOf(num('C22'), e22), true);
-    updateKpis();
-  }
-
-  function updateKpis() {
-    var c20 = num('C20'), e20 = num('B20') + c20 + num('D20');
-    var c22 = num('C22'), e22 = num('B22') + c22 + num('D22');
-    var f20 = pctOf(c20, e20);
-    var f22 = pctOf(c22, e22);
-    var kEx = document.getElementById('kpiExpress');
-    var kExS = document.getElementById('kpiExpressSub');
-    var kTr = document.getElementById('kpiTruck');
-    var kTrS = document.getElementById('kpiTruckSub');
-    if (f20 === null) { kEx.textContent = '—'; kExS.textContent = '未填写数据'; }
-    else { kEx.textContent = f20 + '%'; kExS.textContent = '完成 ' + c20 + ' / 一共 ' + e20 + ' 单'; }
-    if (f22 === null) { kTr.textContent = '—'; kTrS.textContent = '未填写数据'; }
-    else { kTr.textContent = f22 + '%'; kTrS.textContent = '完成 ' + c22 + ' / 一共 ' + e22 + ' 单'; }
-    document.getElementById('kpiShelf').textContent = num('L9') * num('L5');
-    document.getElementById('kpiShip').textContent = e20 + e22;
   }
 
   function collectData() {
@@ -596,38 +551,165 @@
     recalc();
   }
 
-  var saveTimer = null;
+  function recalc() {
+    var K3 = num('K3'), L3 = num('L3');
+    setOut('M3', K3 * L3);
+    var K5 = num('K5'), L5 = num('L5');
+    setOut('M5', K5 * L5);
+    var L10 = num('L10'), L11 = num('L11');
+    var l9 = L11 + L10 - K5;
+    setOut('L9', l9);
+    setOut('O9', l9 * L5);
+    setOut('O10', L10 * L5);
+    setOut('O11', L11 * L5);
+    var e20 = num('B20') + num('C20') + num('D20');
+    setOut('E20', e20);
+    setOut('F20', pctOf(num('C20'), e20), true);
+    var e22 = num('B22') + num('C22') + num('D22');
+    setOut('E22', e22);
+    setOut('F22', pctOf(num('C22'), e22), true);
+    updateKpis();
+    updateChart();
+  }
+
+  function updateKpis() {
+    var c20 = num('C20'), e20 = num('B20') + c20 + num('D20');
+    var c22 = num('C22'), e22 = num('B22') + c22 + num('D22');
+    var f20 = pctOf(c20, e20);
+    var f22 = pctOf(c22, e22);
+    var kEx = document.getElementById('kpiExpress');
+    var kExS = document.getElementById('kpiExpressSub');
+    var kTr = document.getElementById('kpiTruck');
+    var kTrS = document.getElementById('kpiTruckSub');
+    if (f20 === null) { kEx.textContent = '—'; kExS.textContent = '未填写数据'; }
+    else { kEx.textContent = f20 + '%'; kExS.textContent = '完成 ' + c20 + ' / 一共 ' + e20 + ' 单'; }
+    if (f22 === null) { kTr.textContent = '—'; kTrS.textContent = '未填写数据'; }
+    else { kTr.textContent = f22 + '%'; kTrS.textContent = '完成 ' + c22 + ' / 一共 ' + e22 + ' 单'; }
+    document.getElementById('kpiShelf').textContent = num('L9') * num('L5');
+    document.getElementById('kpiShip').textContent = e20 + e22;
+  }
+
+  var chart = null;
+  var chartEl = document.getElementById('completionChart');
+  if (window.echarts) {
+    chart = echarts.init(chartEl);
+    new ResizeObserver(function () { chart.resize(); }).observe(chartEl);
+  }
+
+  function updateChart() {
+    if (!chart) return;
+    var c20 = num('C20'), e20 = num('B20') + c20 + num('D20');
+    var c22 = num('C22'), e22 = num('B22') + c22 + num('D22');
+    function comp(part, total) { return (!total || total <= 0) ? null : Math.min(100, part / total * 100); }
+    var f20 = comp(c20, e20);
+    var f22 = comp(c22, e22);
+    var meta = [
+      { c: c20, e: e20, label: '快递' },
+      { c: c22, e: e22, label: '卡车' }
+    ];
+    var any = f20 !== null || f22 !== null;
+    chart.setOption({
+      animationDuration: 250,
+      tooltip: {
+        trigger: 'axis',
+        confine: true,
+        formatter: function (params) {
+          var p = params[0];
+          if (p == null || p.value == null) return '该类别未填写发货数据';
+          var m = meta[p.dataIndex];
+          return m.label + '<br>完成并发货：' + m.c + ' 单<br>一共：' + m.e + ' 单<br>完成度：<b>' + p.value.toFixed(1) + '%</b>';
+        }
+      },
+      grid: { left: 44, right: 18, top: 26, bottom: 26 },
+      xAxis: {
+        type: 'category',
+        data: ['快递', '卡车'],
+        axisLine: { lineStyle: { color: '#9aa4ae' } },
+        axisTick: { show: false },
+        axisLabel: { color: '#1c2733', fontSize: 12.5 }
+      },
+      yAxis: {
+        type: 'value',
+        min: 0,
+        max: 100,
+        interval: 20,
+        axisLabel: { formatter: '{value}%', color: '#5b6b7a' },
+        splitLine: { lineStyle: { color: '#ecebe6' } }
+      },
+      series: [{
+        type: 'bar',
+        data: [
+          { value: f20, itemStyle: { color: '#156082' } },
+          { value: f22, itemStyle: { color: '#E97132' } }
+        ],
+        barWidth: 64,
+        label: {
+          show: true,
+          position: 'top',
+          formatter: function (p) { return p.value == null ? '' : p.value.toFixed(1) + '%'; },
+          fontSize: 13,
+          fontWeight: 700
+        },
+        itemStyle: { borderRadius: [4, 4, 0, 0] }
+      }],
+      graphic: any ? [] : [{
+        type: 'text',
+        left: 'center',
+        top: 'middle',
+        style: {
+          text: '填写"完成并发货"数据后自动生成图表',
+          fill: '#9aa4ae',
+          fontSize: 12.5
+        }
+      }]
+    }, { notMerge: true });
+  }
+
+  // 保存到云端
   function saveToCloud() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(async function() {
       try {
+        var today = dateInput.value;
+        db.dates[today] = collectData();
         await fetch(API_URL, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(collectData())
+          body: JSON.stringify(db)
         });
-        setStatus('已自动同步到云端', 'ok');
+        setStatus('已同步 ' + today + ' 数据', 'ok');
       } catch(e) {
-        console.log('保存失败', e);
+        console.log('云端保存失败', e);
       }
-    }, 1000);
+    }, 800);
   }
 
+  // 从云端加载
   async function loadFromCloud() {
     try {
       var res = await fetch(API_URL);
       var cloudData = await res.json();
-      if (cloudData && Object.keys(cloudData).length > 0) {
-        applyData(cloudData);
-        setStatus('已从云端加载最新数据', 'ok');
+      if (cloudData && cloudData.dates) {
+        db = cloudData;
       } else {
-        setStatus('空白，填完自动保存', 'ok');
+        db = { dates: {} };
+      }
+      var today = dateInput.value;
+      if (db.dates[today]) {
+        applyData(db.dates[today]);
+        setStatus('已加载 ' + today + ' 数据', 'ok');
+      } else {
+        applyData({});
+        setStatus(today + ' 新一天，填完自动保存', 'ok');
       }
     } catch(e) {
+      console.log('云端加载失败', e);
       setStatus('云端加载失败，离线模式', 'err');
+      applyData({});
     }
   }
 
+  // 监听输入变化
   document.querySelectorAll('input.cell').forEach(function (inp) {
     inp.addEventListener('input', function () {
       recalc();
@@ -636,29 +718,25 @@
   });
   noteInput.addEventListener('input', saveToCloud);
 
-  document.getElementById('btnShare').addEventListener('click', function() {
-    var dataStr = JSON.stringify(collectData());
-    var encoded = btoa(unescape(encodeURIComponent(dataStr)));
-    var shareUrl = window.location.href.split('#')[0] + '#data=' + encoded;
-    navigator.clipboard.writeText(shareUrl).then(function() {
-      alert('分享链接已复制！发给领导就行');
-    }).catch(function() {
-      prompt('复制这个链接发给领导：', shareUrl);
-    });
+  // 换日期
+  dateInput.addEventListener('change', function () {
+    var selectedDate = dateInput.value;
+    // 先保存当前
+    saveToCloud();
+    // 加载新日期
+    setTimeout(function() {
+      if (db.dates[selectedDate]) {
+        applyData(db.dates[selectedDate]);
+        setStatus('已加载 ' + selectedDate + ' 数据', 'ok');
+      } else {
+        applyData({});
+        setStatus(selectedDate + ' 新一天，填完自动保存', 'ok');
+      }
+    }, 500);
   });
 
-  if (window.location.hash.includes('data=')) {
-    var encoded = window.location.hash.split('data=')[1];
-    try {
-      var decoded = decodeURIComponent(escape(atob(encoded)));
-      applyData(JSON.parse(decoded));
-      setStatus('已加载分享数据（只读）', 'ok');
-    } catch(e) {}
-  } else {
-    loadFromCloud();
-  }
-
-  recalc();
+  // 初始化
+  loadFromCloud();
 })();
 </script>
 </body>
