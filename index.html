@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -14,11 +14,12 @@
     --blue: #156082;
     --orange: #E97132;
     --green: #2e7d4f;
-    --c-y: #fff4cc;
-    --c-g: #f1f1ee;
-    --c-grn: #dceade;
-    --c-bg: #e2ecf0;
-    --c-or: #fbe3d5;
+    /* 原表底色语义 */
+    --c-y: #fff4cc;   /* 快递：黄色 */
+    --c-g: #f1f1ee;   /* 卡车：浅灰 */
+    --c-grn: #dceade; /* 理库状态：浅绿 */
+    --c-bg: #e2ecf0;  /* 退件处理：蓝灰 */
+    --c-or: #fbe3d5;  /* 完成并发货：浅橙 */
     --c-gy: #F2F2F2;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,6 +32,8 @@
     padding: 20px 16px 48px;
   }
   .wrap { max-width: 1500px; margin: 0 auto; }
+
+  /* ===== 顶栏 ===== */
   .app-head {
     display: flex;
     align-items: flex-end;
@@ -44,7 +47,8 @@
   .date-controls { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
   .field { display: flex; flex-direction: column; gap: 4px; }
   .field label { font-size: 11.5px; color: var(--ink-soft); font-weight: 600; }
-  .field input[type="date"] {
+  .field input[type="date"],
+  .field select {
     height: 36px;
     border: 1px solid #cfcbc1;
     border-radius: 8px;
@@ -54,6 +58,9 @@
     color: var(--ink);
     outline: none;
   }
+  .field input[type="date"]:focus, .field select:focus { border-color: var(--blue); box-shadow: 0 0 0 2px rgba(21,96,130,.15); }
+
+  /* 数据文件连接 */
   .file-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .file-status {
     font-size: 12px;
@@ -62,75 +69,279 @@
     border-radius: 20px;
     background: #ecebe5;
     color: var(--ink-soft);
-    max-width: 240px;
+    max-width: 220px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .file-status.ok { background: #e2f0e6; color: var(--green); }
   .file-status.err { background: #fbe6e0; color: #c0392b; }
-  .save-btn {
+  .btn {
     height: 36px;
-    padding: 0 16px;
-    border: none;
-    border-radius: 8px;
-    background: var(--orange);
-    color: white;
+    border: 1px solid var(--blue);
+    background: var(--blue);
+    color: #fff;
+    font: inherit;
+    font-size: 12.5px;
     font-weight: 700;
-    font-size: 13px;
+    border-radius: 8px;
+    padding: 0 14px;
     cursor: pointer;
+    outline: none;
   }
-  .save-btn:hover { background: #d85f22; }
-  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px; }
-  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .btn:hover { filter: brightness(1.08); }
+  .btn-ghost { background: #fff; color: var(--blue); }
+  .fallback-row { display: flex; gap: 8px; margin: 4px 0 0; }
+  .fallback-row .btn { background: #fff; color: var(--blue); border-color: #cfcbc1; }
+
+  /* ===== 概览 KPI ===== */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
   .kpi .k-label { font-size: 12px; color: var(--ink-soft); }
   .kpi .k-value { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; margin-top: 2px; }
   .kpi .k-sub { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
   .kpi.k-blue .k-value { color: var(--blue); }
   .kpi.k-orange .k-value { color: var(--orange); }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px 18px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(28,39,51,.04); }
-  .card h2 { font-size: 15px; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .card h2 .tag { font-size: 11px; font-weight: 700; color: #6a7180; background: #efeee9; border-radius: 20px; padding: 2px 9px; }
+
+  /* ===== 卡片 ===== */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px 18px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(28,39,51,.04);
+  }
+  .card h2 {
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h2 .tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6a7180;
+    background: #efeee9;
+    border-radius: 20px;
+    padding: 2px 9px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  /* ===== 表格通用 ===== */
   .table-scroll { overflow-x: auto; }
-  table.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-  table.tbl th { background: #f7f6f1; font-weight: 700; font-size: 12.5px; color: var(--ink); padding: 8px 10px; border: 1px solid var(--line); white-space: nowrap; }
-  table.tbl td { border: 1px solid var(--line); padding: 6px 8px; text-align: center; }
-  table.tbl td.row-name { text-align: left; font-weight: 600; background: #fbfaf6; white-space: nowrap; }
+  table.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+  table.tbl th {
+    background: #f7f6f1;
+    font-weight: 700;
+    font-size: 12.5px;
+    color: var(--ink);
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.tbl td {
+    border: 1px solid var(--line);
+    padding: 6px 8px;
+    text-align: center;
+  }
+  table.tbl td.row-name {
+    text-align: left;
+    font-weight: 600;
+    background: #fbfaf6;
+    white-space: nowrap;
+  }
+  table.tbl td .colnote { display: block; font-size: 10.5px; color: var(--ink-soft); font-weight: 400; margin-top: 1px; }
   .grp-y  { background: var(--c-y) !important; }
   .grp-g  { background: var(--c-g) !important; }
   .grp-grn{ background: var(--c-grn) !important; }
   .grp-bg { background: var(--c-bg) !important; }
   .grp-or { background: var(--c-or) !important; }
+  .grp-dk { background: #e8e8e8 !important; }
+  .grp-dk input.cell { color: var(--ink); }
+
+  /* ===== 输入格 ===== */
   .num-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
-  .num-wrap .unit { position: absolute; right: 5px; top: 50%; transform: translateY(-50%); font-size: 10.5px; color: #8a93a0; pointer-events: none; }
-  input.cell { width: 100%; min-width: 54px; height: 30px; border: 1px solid transparent; background: transparent; text-align: center; font: inherit; font-variant-numeric: tabular-nums; color: var(--ink); padding: 3px 18px 3px 4px; border-radius: 5px; outline: none; }
+  .num-wrap .unit {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10.5px;
+    color: #8a93a0;
+    pointer-events: none;
+  }
+  input.cell {
+    width: 100%;
+    min-width: 54px;
+    height: 30px;
+    border: 1px solid transparent;
+    background: transparent;
+    text-align: center;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    padding: 3px 18px 3px 4px;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color .12s, background .12s;
+  }
   input.cell:hover { border-color: #cfcbc1; }
-  input.cell:focus { border-color: var(--blue); background: #f4f9fc; }
-  .cell-out { display: inline-block; min-width: 54px; height: 30px; line-height: 30px; font-weight: 800; border-radius: 5px; background: #f2f1ec; padding: 0 8px; }
+  input.cell:focus {
+    border-color: var(--blue);
+    background: #f4f9fc;
+    box-shadow: 0 0 0 2px rgba(21,96,130,.14);
+  }
+  .cell-out {
+    display: inline-block;
+    min-width: 54px;
+    height: 30px;
+    line-height: 30px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    border-radius: 5px;
+    background: #f2f1ec;
+    padding: 0 8px;
+  }
   .cell-out.pct { color: var(--blue); }
-  .lk-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--c-grn); border: 1px solid #c6dcc9; border-radius: 8px; padding: 8px 12px; }
+  .cell-out .na { color: #a5acb4; font-weight: 400; }
+  .cell-out.dark { background: #2a323b; color: #fff; }
+
+  /* ===== 理库状态 ===== */
+  .lk-rows { display: flex; flex-direction: column; gap: 8px; }
+  .lk-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: var(--c-grn);
+    border: 1px solid #c6dcc9;
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
   .lk-row .r-label { font-weight: 700; font-size: 13px; }
   .lk-row .r-sub { font-size: 11.5px; color: #4d6a52; margin-left: auto; }
-  .pair { display: flex; align-items: center; gap: 6px; font-size: 12.5px; }
-  .table-grid { display: flex; flex-direction: column; gap: 16px; }
+  .pair { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink); }
+  .pair .cell-out { background: #f4fbf5; }
+  .sub-h { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); margin: 14px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .sub-h::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  /* ===== 三表垂直排列 ===== */
+  .table-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
   .table-block { min-width: 0; background: #fafaf7; border-radius: 10px; padding: 14px 16px; border: 1px solid var(--line); }
-  .table-block-title { font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 10px; padding-left: 2px; display: flex; align-items: center; gap: 8px; }
-  .table-block-title::before { content: ""; width: 4px; height: 16px; border-radius: 2px; background: var(--blue); }
+  .table-block-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 10px;
+    padding-left: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .table-block-title::before {
+    content: "";
+    width: 4px;
+    height: 16px;
+    border-radius: 2px;
+    background: var(--blue);
+  }
   .table-block:nth-child(2) .table-block-title::before { background: var(--orange); }
   .table-block:nth-child(3) .table-block-title::before { background: var(--green); }
-  .completion-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: stretch; }
+
+  /* ===== 考勤 ===== */
+  .att-rows { display: flex; flex-direction: column; gap: 8px; }
+  .att-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .att-row .r-label { font-weight: 700; min-width: 56px; font-size: 13px; }
+  .att-row .unit-word { color: var(--ink-soft); font-size: 12.5px; }
+  .att-row .formula { font-size: 11.5px; color: var(--ink-soft); margin-left: auto; }
+  .att-row.temp { background: var(--c-bg); border-color: #c3d8e2; }
+
+  /* ===== 完成度 ===== */
+  .completion-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 18px;
+    align-items: stretch;
+  }
   #completionChart { width: 100%; height: 280px; }
   .chart-box { border: 1px solid var(--line); border-radius: 10px; padding: 10px 8px 6px; background: #fdfcfa; }
-  .note-bar { margin-top: 14px; background: var(--c-gy); border: 1px dashed #d8d2c4; border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 8px; color: #FA7D00; font-weight: 700; font-size: 13px; }
-  .note-bar input { flex: 1; border: none; background: transparent; font: inherit; color: #FA7D00; font-weight: 700; outline: none; }
+  .chart-box .c-title { font-size: 12.5px; font-weight: 700; color: var(--ink-soft); text-align: center; margin-bottom: 4px; }
+  .note-bar {
+    margin-top: 14px;
+    background: var(--c-gy);
+    border: 1px dashed #d8d2c4;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #FA7D00;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .note-bar input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: #FA7D00;
+    font-weight: 700;
+    outline: none;
+  }
+
+  @media (max-width: 820px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .completion-grid { grid-template-columns: 1fr; }
+    #completionChart { height: 240px; }
+  }
+  @media (max-width: 520px) {
+    body { padding: 14px 10px 32px; }
+    .kpis { grid-template-columns: 1fr 1fr; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <!-- ===== 顶栏：标题 + 日期管理 + 数据文件 ===== -->
   <header class="app-head">
     <div>
       <h1>仓库工作日报</h1>
-      <div class="sub">收发记录 · 理库状态 · 发货完成度</div>
+      <div class="sub">收发记录 · 理库状态 · 考勤 · 发货完成度</div>
     </div>
     <div class="date-controls">
       <div class="field">
@@ -138,14 +349,25 @@
         <input type="date" id="dateInput">
       </div>
       <div class="field">
-        <label>数据同步</label>
+        <label for="historySelect">历史日报</label>
+        <select id="historySelect"><option value="">— 选择历史日期 —</option></select>
+      </div>
+      <div class="field">
+        <label>数据文件（存 U 盘，跟着走）</label>
         <div class="file-row">
-          <span class="file-status" id="fileStatus">加载中...</span>
-          <button class="save-btn" id="saveBtn">导出最新数据上传</button>
+          <span class="file-status" id="fileStatus">未连接数据文件</span>
+          <button type="button" class="btn" id="btnOpen">打开数据文件</button>
+          <button type="button" class="btn btn-ghost" id="btnNew">新建数据文件</button>
+        </div>
+        <div class="fallback-row" id="fallbackRow" style="display:none">
+          <button type="button" class="btn" id="btnImport">导入数据</button>
+          <button type="button" class="btn" id="btnExport">导出数据</button>
         </div>
       </div>
     </div>
   </header>
+
+  <!-- ===== 概览 KPI ===== -->
   <section class="kpis">
     <div class="kpi k-blue">
       <div class="k-label">快递 · 完成度</div>
@@ -168,9 +390,13 @@
       <div class="k-sub">快递 + 卡车</div>
     </div>
   </section>
+
+  <!-- ===== 收发记录 ===== -->
   <section class="card">
     <h2>收发记录 <span class="tag">快递 · DSV · GEL</span></h2>
     <div class="table-grid">
+
+      <!-- 快递表 -->
       <div class="table-block">
         <h3 class="table-block-title">快递</h3>
         <div class="table-scroll">
@@ -178,130 +404,174 @@
             <thead>
               <tr>
                 <th style="background:transparent;"></th>
-                <th class="grp-y">快递 DPD<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（托）</span></th>
-                <th class="grp-y">快递 DHL<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（笼）</span></th>
+                <th class="grp-y">快递 DPD<span class="colnote">（托）</span></th>
+                <th class="grp-y">快递 DHL<span class="colnote">（笼）</span></th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td class="row-name">出：（托）</td>
-                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B4"><span class="unit">托</span></div></td>
-                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C4"><span class="unit">笼</span></div></td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B4" aria-label="DPD 出托数"><span class="unit">托</span></div></td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C4" aria-label="DHL 出笼数"><span class="unit">笼</span></div></td>
               </tr>
               <tr>
                 <td class="row-name">回：</td>
-                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B5"><span class="unit">托</span></div></td>
-                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C5"><span class="unit">笼</span></div></td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B5" aria-label="DPD 回托数"><span class="unit">托</span></div></td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C5" aria-label="DHL 回笼数"><span class="unit">笼</span></div></td>
               </tr>
               <tr>
                 <td class="row-name">预计要明天 （托）</td>
-                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B7"><span class="unit">托</span></div></td>
-                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C7"><span class="unit">笼</span></div></td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B7" aria-label="DPD 预计明天托数"><span class="unit">托</span></div></td>
+                <td class="grp-y"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C7" aria-label="DHL 预计明天笼数"><span class="unit">笼</span></div></td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      <!-- DSV表 -->
       <div class="table-block">
         <h3 class="table-block-title">卡车 DSV</h3>
         <div class="table-scroll">
           <table class="tbl">
             <thead>
               <tr>
-                <th class="grp-g">卡车 DSV<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（托）</span></th>
+                <th class="grp-g">卡车 DSV<span class="colnote">（托）</span></th>
               </tr>
             </thead>
             <tbody>
-              <tr><td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E4"><span class="unit">托</span></div></td></tr>
-              <tr><td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E5"><span class="unit">托</span></div></td></tr>
-              <tr><td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E6"><span class="unit">托</span></div></td></tr>
-              <tr><td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E7"><span class="unit">托</span></div></td></tr>
+              <tr>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E4" aria-label="DSV 出托数"><span class="unit">托</span></div></td>
+              </tr>
+              <tr>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E5" aria-label="DSV 回托数"><span class="unit">托</span></div></td>
+              </tr>
+              <tr>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E6" aria-label="DSV 出单托数"><span class="unit">托</span></div></td>
+              </tr>
+              <tr>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E7" aria-label="DSV 预计明天托数"><span class="unit">托</span></div></td>
+              </tr>
             </tbody>
           </table>
         </div>
       </div>
+
+      <!-- GEL表 -->
       <div class="table-block">
         <h3 class="table-block-title">卡车 GEL</h3>
         <div class="table-scroll">
           <table class="tbl">
             <thead>
               <tr>
-                <th class="grp-g">卡车 GEL<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（托）</span></th>
-                <th class="grp-g">卡车 GEL<span style="display:block;font-size:10.5px;color:#5b6b7a;font-weight:400;">（件）</span></th>
+                <th class="grp-g">卡车 GEL<span class="colnote">（托）</span></th>
+                <th class="grp-g">卡车 GEL<span class="colnote">（件）</span></th>
                 <th>单位说明</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G4T"><span class="unit">托</span></div></td>
-                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G4"><span class="unit">件</span></div></td>
-                <td>GEL loose-Light</td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G4T" aria-label="GEL 出托数"><span class="unit">托</span></div></td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G4" aria-label="GEL 出件数"><span class="unit">件</span></div></td>
+                <td class="note-cell">GEL loose-Light</td>
               </tr>
               <tr>
-                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G5T"><span class="unit">托</span></div></td>
-                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G5"><span class="unit">件</span></div></td>
-                <td>GEL ROC</td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G5T" aria-label="GEL 回托数"><span class="unit">托</span></div></td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G5" aria-label="GEL 回件数"><span class="unit">件</span></div></td>
+                <td class="note-cell">GEL ROC</td>
               </tr>
               <tr>
-                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G6"><span class="unit">托</span></div></td>
-                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G6P"><span class="unit">件</span></div></td>
-                <td>GEL Pallet</td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G6" aria-label="GEL 出单托数"><span class="unit">托</span></div></td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G6P" aria-label="GEL 出单件数"><span class="unit">件</span></div></td>
+                <td class="note-cell">GEL Pallet</td>
               </tr>
               <tr>
-                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G7"><span class="unit">托</span></div></td>
-                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G7P"><span class="unit">件</span></div></td>
-                <td>GEL Loose-heavy</td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G7" aria-label="GEL 预计明天托数"><span class="unit">托</span></div></td>
+                <td class="grp-g"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="G7P" aria-label="GEL 预计明天件数"><span class="unit">件</span></div></td>
+                <td class="note-cell">GEL Loose-heavy</td>
               </tr>
             </tbody>
           </table>
-        </div>
-      </div>
-    </div>
-  </section>
+        </div>  </section>
+
+  
+  </div>
+
+  
+
+  
+  </div>
+
+  
+
+
+
+
+
+
+
+
+  <!-- ===== 退件处理 ===== -->
   <section class="card">
     <h2>退件处理 <span class="tag">个</span></h2>
     <div class="lk-row grp-bg">
       <span class="r-label">退件处理</span>
-      <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L8"> 个</span>
-      <span class="pair" style="margin-left:auto"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="M8"> 个</span>
+      <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L8" aria-label="退件处理数量"> 个</span>
+      <span class="pair" style="margin-left:auto"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="M8" aria-label="退件处理数量2"> 个</span>
     </div>
   </section>
+<!-- ===== 理库状态 ===== -->
   <section class="card">
-    <h2>理库状态 <span class="tag">排 → 托 自动换算</span></h2>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-      <div class="lk-row">
-        <span class="r-label">理库状态</span>
-        <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K3"></span>
-        <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L3" value="13">托</span>
-        <span class="r-sub">一共 <span class="cell-out" data-out="M3">0</span> 托</span>
+      <h2>理库状态 <span class="tag">排 → 托 自动换算</span></h2>
+      <div class="lk-rows">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="lk-row">
+          <span class="r-label">理库状态</span>
+          <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K3" aria-label="理库状态 排"></span>
+          <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L3" value="13" aria-label="理库状态 一排托数">托</span>
+          <span class="r-sub">一共 <span class="cell-out" data-out="M3">0</span> 托</span>
+        </div>
+        <div class="lk-row">
+          <span class="r-label">上架数量</span>
+          <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K5" aria-label="上架数量 排"></span>
+          <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L5" value="13" aria-label="上架数量 一排托数">托</span>
+          <span class="r-sub">一共 <span class="cell-out" data-out="M5">0</span> 托</span>
+        </div>
       </div>
-      <div class="lk-row">
-        <span class="r-label">上架数量</span>
-        <span class="pair">排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="K5"></span>
-        <span class="pair">一排 <input class="cell" style="width:64px" type="number" min="0" step="1" data-key="L5" value="13">托</span>
-        <span class="r-sub">一共 <span class="cell-out" data-out="M5">0</span> 托</span>
-      </div>
-    </div>
+
+    
     <div style="border:1px solid #c6dcc9; border-radius:8px; padding:12px; background:#f4f9f5;">
-      <div class="lk-row" style="background:transparent;border:none;">
+        
+      </div>
+    
+  
+
+    <div style="border:1px solid #c6dcc9; border-radius:8px; padding:12px; background:#f4f9f5;">
+      <div class="lk-row grp-bg" style="background:transparent; border:none;">
         <span class="r-label">待上架</span>
         <span class="pair"><span class="cell-out" data-out="L9">0</span> 个</span>
         <span class="r-sub">一共（托）<span class="cell-out" data-out="O9">0</span></span>
+        <span class="r-sub" style="font-weight:400">= 早柜 + 到柜 − 上架排</span>
       </div>
-      <div class="lk-row" style="background:transparent;border:none;">
+      <div class="lk-row grp-bg" style="background:transparent; border:none;">
         <span class="r-label">到柜</span>
-        <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L10"> 个</span>
+        <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L10" aria-label="到柜排数"> 个</span>
         <span class="r-sub">一共（托）<span class="cell-out" data-out="O10">0</span></span>
       </div>
-      <div class="lk-row" style="background:transparent;border:none;">
+      <div class="lk-row grp-bg" style="background:transparent; border:none;">
         <span class="r-label">截至今日早的柜的数量</span>
-        <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L11" value="0"> 个</span>
+        <span class="pair"><input class="cell" style="width:70px" type="number" min="0" step="1" data-key="L11" value="0" aria-label="早柜数量"> 个</span>
         <span class="r-sub">一共（托）<span class="cell-out" data-out="O11">0</span></span>
       </div>
     </div>
+  
   </section>
+
+  
+
+<!-- ===== 发货完成度 ===== -->
   <section class="card">
-    <h2>发货完成度 <span class="tag">自动计算</span></h2>
+    <h2>发货（单）：完成度 <span class="tag">一共与完成度自动计算</span></h2>
     <div class="completion-grid">
       <div class="table-scroll">
         <table class="tbl">
@@ -318,17 +588,25 @@
           <tbody>
             <tr>
               <td class="row-name">快递</td>
-              <td class="grp-bg"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B20"></div></td>
-              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C20"></div></td>
-              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="D20"></div></td>
+              <td class="grp-bg"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B20" aria-label="快递 待拣货"></div></td>
+              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C20" aria-label="快递 完成并发货"></div></td>
+              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="D20" aria-label="快递 待复核"></div></td>
               <td><span class="cell-out" data-out="E20">0</span></td>
               <td><span class="cell-out pct" data-out="F20">—</span></td>
             </tr>
             <tr>
+              <td class="row-name"></td>
+              <td class="grp-dk"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B21" aria-label="备用行 待拣货"></div></td>
+              <td class="grp-dk"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C21" aria-label="备用行 完成并发货"></div></td>
+              <td><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="D21" aria-label="备用行 待复核"></div></td>
+              <td><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="E21" aria-label="备用行 一共"></div></td>
+              <td><span class="cell-out pct" data-out="F21">—</span></td>
+            </tr>
+            <tr>
               <td class="row-name">卡车</td>
-              <td class="grp-bg"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B22"></div></td>
-              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C22"></div></td>
-              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="D22"></div></td>
+              <td class="grp-bg"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="B22" aria-label="卡车 待拣货"></div></td>
+              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="C22" aria-label="卡车 完成并发货"></div></td>
+              <td class="grp-or"><div class="num-wrap"><input class="cell" type="number" min="0" step="1" data-key="D22" aria-label="卡车 待复核"></div></td>
               <td><span class="cell-out" data-out="E22">0</span></td>
               <td><span class="cell-out pct" data-out="F22">—</span></td>
             </tr>
@@ -336,41 +614,217 @@
         </table>
       </div>
       <div class="chart-box">
-        <div style="font-size:12.5px;font-weight:700;color:#5b6b7a;text-align:center;margin-bottom:4px;">完成度 = 完成并发货 ÷ 一共</div>
+        <div class="c-title">完成度 = 完成并发货 ÷ 一共</div>
         <div id="completionChart"></div>
       </div>
     </div>
     <div class="note-bar">
       <span>备注</span>
-      <input type="text" id="noteInput" placeholder="今日备注…">
+      <input type="text" id="noteInput" placeholder="原表预留格，可写今日备注…" aria-label="备注">
     </div>
   </section>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js" integrity="sha384-pPi0zxBAoDu6+JXW/C68UZLvBUUtU+7zonhif43rqj7pxsGyqyqzcian2Rj37Rss" crossorigin="anonymous"></script>
 <script>
 (function () {
   'use strict';
-  var OWNER = '2367772484yu-bit';
-  var REPO = 'daily-report';
-  var BRANCH = 'main';
-  var DATA_PATH = 'data.json';
-  var RAW_URL = 'https://raw.githubusercontent.com/' + OWNER + '/' + REPO + '/' + BRANCH + '/' + DATA_PATH;
-  var API_URL = 'https://api.github.com/repos/' + OWNER + '/' + REPO + '/contents/' + DATA_PATH;
-  var db = { dates: {} };
-  var dataSha = null;
-  var TOKEN = localStorage.getItem('gh_token') || '';
+
+  /* ============================================================
+   * 数据存储：数据文件跟 U 盘走
+   *  - 主方式：File System Access API（Chrome / Edge），直接读写 U 盘上的 JSON 文件
+   *  - 兜底方式：导入 / 导出（浏览器不支持 FSA 时显示）
+   * ============================================================ */
+  var FILE_TYPES = [{ description: '日报数据 JSON', accept: { 'application/json': ['.json'] } }];
+  var hasFSA = !!(window.showOpenFilePicker && window.showSaveFilePicker);
+
+  var db = { dates: {} };          // 全部日报数据（按日期）
+  var fileHandle = null;           // 当前连接的 U 盘数据文件
   var fileStatusEl = document.getElementById('fileStatus');
+  var fallbackRow = document.getElementById('fallbackRow');
+
+  /* 每个新日期的模板默认值（原表初始值） */
+  var DEFAULT_VALS = { L3: '13', L5: '13', L11: '0' };
+
   var dateInput = document.getElementById('dateInput');
+  var historySelect = document.getElementById('historySelect');
   var noteInput = document.getElementById('noteInput');
-  var saveTimer = null;
+  var prevDate = null;
+
   if (!dateInput.value) {
     var now = new Date();
     dateInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
   }
+
+  /* ===== 状态显示 ===== */
   function setStatus(text, cls) {
     fileStatusEl.textContent = text;
     fileStatusEl.className = 'file-status' + (cls ? ' ' + cls : '');
   }
+  var savedTimer = null;
+  function flashSaved() {
+    if (!fileHandle) return;
+    var name = fileHandle.name || '数据文件';
+    setStatus('已保存到 ' + name, 'ok');
+    clearTimeout(savedTimer);
+    savedTimer = setTimeout(function () {
+      setStatus('已连接：' + name, 'ok');
+    }, 1500);
+  }
+
+  /* ===== 收集 / 应用数据 ===== */
+  function collectData() {
+    var data = {};
+    document.querySelectorAll('input.cell').forEach(function (inp) {
+      data[inp.getAttribute('data-key')] = inp.value;
+    });
+    data['H21'] = noteInput.value;
+    return data;
+  }
+  /* 前一天待上架 L9 = 前一天 L11 + L10 − K5，用于今日早柜默认值 */
+  function getPrevDayL9(cur) {
+    var keys = Object.keys(db.dates).sort();
+    var prev = null;
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i] < cur) { prev = keys[i]; } else { break; }
+    }
+    if (!prev) return null;
+    var d = db.dates[prev] || {};
+    function n(k, def) { var v = parseFloat(d[k]); return isNaN(v) ? def : v; }
+    return n('L11', 3) + n('L10', 0) - n('K5', 0);
+  }
+
+  function applyData(data) {
+    data = data || {};
+    var autoL11 = null;
+    if (data['L11'] === undefined) {
+      autoL11 = getPrevDayL9(dateInput.value);
+    }
+    document.querySelectorAll('input.cell').forEach(function (inp) {
+      var k = inp.getAttribute('data-key');
+      if (k === 'L11' && autoL11 !== null) { inp.value = String(autoL11); return; }
+      if (data[k] !== undefined) { inp.value = data[k]; }
+      else if (DEFAULT_VALS[k] !== undefined) { inp.value = DEFAULT_VALS[k]; }
+      else { inp.value = ''; }
+    });
+    noteInput.value = data['H21'] !== undefined ? data['H21'] : '';
+    recalc();
+  }
+
+  /* ===== 写回文件 ===== */
+  async function writeToFile(dateKey) {
+    if (!fileHandle) return false;
+    try {
+      db.dates[dateKey || dateInput.value] = collectData();
+      var w = await fileHandle.createWritable();
+      await w.write(JSON.stringify(db, null, 2));
+      await w.close();
+      return true;
+    } catch (e) {
+      setStatus('保存失败，请重新打开数据文件', 'err');
+      return false;
+    }
+  }
+  var saveTimer2 = null;
+  function scheduleSave() {
+    if (!fileHandle) {
+      setStatus('未连接数据文件，填写内容不会保存', 'err');
+      return;
+    }
+    clearTimeout(saveTimer2);
+    saveTimer2 = setTimeout(function () {
+      writeToFile().then(function (ok) { if (ok) flashSaved(); });
+    }, 400);
+  }
+
+  /* ===== 打开 / 新建数据文件（FSA 主方式） ===== */
+  async function openDataFile() {
+    try {
+      var handles = await window.showOpenFilePicker({ types: FILE_TYPES, multiple: false });
+      var handle = handles[0];
+      var file = await handle.getFile();
+      var parsed = JSON.parse(await file.text());
+      db = parsed && typeof parsed === 'object' ? parsed : { dates: {} };
+      if (!db.dates) db.dates = {};
+      fileHandle = handle;
+      prevDate = dateInput.value;
+      applyData(db.dates[prevDate] || {});
+      refreshHistory();
+      setStatus('已连接：' + file.name, 'ok');
+    } catch (e) {
+      if (e && e.name === 'AbortError') return; // 用户取消
+      setStatus('打开失败：不是有效的日报数据文件', 'err');
+    }
+  }
+  async function newDataFile() {
+    try {
+      var handle = await window.showSaveFilePicker({ suggestedName: '仓库日报数据.json', types: FILE_TYPES });
+      fileHandle = handle;
+      db = { dates: {} };
+      prevDate = dateInput.value;
+      applyData({});
+      await writeToFile();
+      refreshHistory();
+      setStatus('已新建并连接：' + handle.name, 'ok');
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+      setStatus('新建失败', 'err');
+    }
+  }
+
+  /* ===== 兜底：导入 / 导出 ===== */
+  var importInput = document.createElement('input');
+  importInput.type = 'file';
+  importInput.accept = '.json,application/json';
+  importInput.style.display = 'none';
+  document.body.appendChild(importInput);
+  importInput.addEventListener('change', function () {
+    var f = importInput.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var parsed = JSON.parse(reader.result);
+        db = parsed && typeof parsed === 'object' ? parsed : { dates: {} };
+        if (!db.dates) db.dates = {};
+        prevDate = dateInput.value;
+        applyData(db.dates[prevDate] || {});
+        refreshHistory();
+        setStatus('已导入：' + f.name + '（数据保存在本页，未写入 U 盘文件）', 'ok');
+      } catch (e2) {
+        setStatus('导入失败：文件格式不正确', 'err');
+      }
+    };
+    reader.readAsText(f);
+    importInput.value = '';
+  });
+  function exportData() {
+    db.dates[dateInput.value] = collectData();
+    var blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '仓库日报数据.json';
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    setStatus('已导出，请保存到 U 盘', 'ok');
+  }
+
+  /* ===== 历史日报列表 ===== */
+  function refreshHistory() {
+    var keys = Object.keys(db.dates).sort().reverse();
+    historySelect.innerHTML = '';
+    var ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = keys.length ? '— 历史日报（' + keys.length + ' 天）—' : '— 选择历史日期 —';
+    historySelect.appendChild(ph);
+    keys.forEach(function (k) {
+      var o = document.createElement('option');
+      o.value = k;
+      o.textContent = k;
+      historySelect.appendChild(o);
+    });
+  }
+
+  /* ===== 数值读取 ===== */
   function num(key) {
     var el = document.querySelector('input.cell[data-key="' + key + '"]');
     if (!el) return 0;
@@ -381,61 +835,52 @@
     var el = document.querySelector('.cell-out[data-out="' + key + '"]');
     if (!el) return;
     if (isPct && (!value || value <= 0 || isNaN(value))) {
-      el.innerHTML = '<span style="color:#a5acb4;font-weight:400;">—</span>';
+      el.innerHTML = '<span class="na">—</span>';
       return;
     }
     el.textContent = value;
   }
-  function pctOf(part, total) {
-    if (!total || total <= 0) return null;
-    var p = part / total * 100;
-    return p % 1 === 0 ? p.toFixed(0) : p.toFixed(1);
-  }
-  function collectData() {
-    var data = {};
-    document.querySelectorAll('input.cell').forEach(function (inp) {
-      data[inp.getAttribute('data-key')] = inp.value;
-    });
-    data['H21'] = noteInput.value;
-    return data;
-  }
-  function applyData(data) {
-    data = data || {};
-    document.querySelectorAll('input.cell').forEach(function (inp) {
-      var k = inp.getAttribute('data-key');
-      if (data[k] !== undefined) { inp.value = data[k]; }
-      else if (k === 'L3' || k === 'L5') { inp.value = '13'; }
-      else if (k === 'L11') { inp.value = '0'; }
-      else { inp.value = ''; }
-    });
-    noteInput.value = data['H21'] !== undefined ? data['H21'] : '';
-    recalc();
-  }
+
+  /* ===== 核心重算（公式与原表一一对应） ===== */
   function recalc() {
     var K3 = num('K3'), L3 = num('L3');
     setOut('M3', K3 * L3);
     var K5 = num('K5'), L5 = num('L5');
     setOut('M5', K5 * L5);
+
     var L10 = num('L10'), L11 = num('L11');
     var l9 = L11 + L10 - K5;
     setOut('L9', l9);
     setOut('O9', l9 * L5);
     setOut('O10', L10 * L5);
     setOut('O11', L11 * L5);
+
     var e20 = num('B20') + num('C20') + num('D20');
     setOut('E20', e20);
     setOut('F20', pctOf(num('C20'), e20), true);
+    var e21 = num('E21');
+    setOut('F21', pctOf(num('C21'), e21), true);
     var e22 = num('B22') + num('C22') + num('D22');
     setOut('E22', e22);
     setOut('F22', pctOf(num('C22'), e22), true);
+
     updateKpis();
     updateChart();
   }
+
+  function pctOf(part, total) {
+    if (!total || total <= 0) return null;
+    var p = part / total * 100;
+    return p % 1 === 0 ? p.toFixed(0) : p.toFixed(1);
+  }
+
+  /* ===== KPI ===== */
   function updateKpis() {
     var c20 = num('C20'), e20 = num('B20') + c20 + num('D20');
     var c22 = num('C22'), e22 = num('B22') + c22 + num('D22');
     var f20 = pctOf(c20, e20);
     var f22 = pctOf(c22, e22);
+
     var kEx = document.getElementById('kpiExpress');
     var kExS = document.getElementById('kpiExpressSub');
     var kTr = document.getElementById('kpiTruck');
@@ -444,15 +889,19 @@
     else { kEx.textContent = f20 + '%'; kExS.textContent = '完成 ' + c20 + ' / 一共 ' + e20 + ' 单'; }
     if (f22 === null) { kTr.textContent = '—'; kTrS.textContent = '未填写数据'; }
     else { kTr.textContent = f22 + '%'; kTrS.textContent = '完成 ' + c22 + ' / 一共 ' + e22 + ' 单'; }
+
     document.getElementById('kpiShelf').textContent = num('L9') * num('L5');
-    document.getElementById('kpiShip').textContent = e20 + e22;
+    document.getElementById('kpiShip').textContent = e20 + num('E21') + e22;
   }
+
+  /* ===== 完成度图表 ===== */
   var chart = null;
   var chartEl = document.getElementById('completionChart');
   if (window.echarts) {
     chart = echarts.init(chartEl);
     new ResizeObserver(function () { chart.resize(); }).observe(chartEl);
   }
+
   function updateChart() {
     if (!chart) return;
     var c20 = num('C20'), e20 = num('B20') + c20 + num('D20');
@@ -460,110 +909,147 @@
     function comp(part, total) { return (!total || total <= 0) ? null : Math.min(100, part / total * 100); }
     var f20 = comp(c20, e20);
     var f22 = comp(c22, e22);
-    var meta = [{ c: c20, e: e20, label: '快递' }, { c: c22, e: e22, label: '卡车' }];
+    var meta = [
+      { c: c20, e: e20, label: '快递' },
+      { c: c22, e: e22, label: '卡车' }
+    ];
     var any = f20 !== null || f22 !== null;
+
     chart.setOption({
       animationDuration: 250,
-      tooltip: { trigger: 'axis', confine: true, formatter: function (params) { var p = params[0]; if (p == null || p.value == null) return '该类别未填写发货数据'; var m = meta[p.dataIndex]; return m.label + '<br>完成并发货：' + m.c + ' 单<br>一共：' + m.e + ' 单<br>完成度：<b>' + p.value.toFixed(1) + '%</b>'; } },
+      tooltip: {
+        trigger: 'axis',
+        confine: true,
+        formatter: function (params) {
+          var p = params[0];
+          if (p == null || p.value == null) return '该类别未填写发货数据';
+          var m = meta[p.dataIndex];
+          return m.label + '<br>完成并发货：' + m.c + ' 单<br>一共：' + m.e + ' 单<br>完成度：<b>' + p.value.toFixed(1) + '%</b>';
+        }
+      },
       grid: { left: 44, right: 18, top: 26, bottom: 26 },
-      xAxis: { type: 'category', data: ['快递', '卡车'], axisLine: { lineStyle: { color: '#9aa4ae' } }, axisTick: { show: false }, axisLabel: { color: '#1c2733', fontSize: 12.5 } },
-      yAxis: { type: 'value', min: 0, max: 100, interval: 20, axisLabel: { formatter: '{value}%', color: '#5b6b7a' }, splitLine: { lineStyle: { color: '#ecebe6' } } },
-      series: [{ type: 'bar', data: [{ value: f20, itemStyle: { color: '#156082' } }, { value: f22, itemStyle: { color: '#E97132' } }], barWidth: 64, label: { show: true, position: 'top', formatter: function (p) { return p.value == null ? '' : p.value.toFixed(1) + '%'; }, fontSize: 13, fontWeight: 700 }, itemStyle: { borderRadius: [4, 4, 0, 0] } }],
-      graphic: any ? [] : [{ type: 'text', left: 'center', top: 'middle', style: { text: '填写"完成并发货"数据后自动生成图表', fill: '#9aa4ae', fontSize: 12.5 } }]
+      xAxis: {
+        type: 'category',
+        data: ['快递', '卡车'],
+        axisLine: { lineStyle: { color: '#9aa4ae' } },
+        axisTick: { show: false },
+        axisLabel: { color: '#1c2733', fontSize: 12.5 }
+      },
+      yAxis: {
+        type: 'value',
+        min: 0,
+        max: 100,
+        interval: 20,
+        axisLabel: { formatter: '{value}%', color: '#5b6b7a' },
+        splitLine: { lineStyle: { color: '#ecebe6' } }
+      },
+      series: [{
+        type: 'bar',
+        data: [
+          { value: f20, itemStyle: { color: '#156082' } },
+          { value: f22, itemStyle: { color: '#E97132' } }
+        ],
+        barWidth: 64,
+        label: {
+          show: true,
+          position: 'top',
+          formatter: function (p) { return p.value == null ? '' : p.value.toFixed(1) + '%'; },
+          fontSize: 13,
+          fontWeight: 700
+        },
+        itemStyle: { borderRadius: [4, 4, 0, 0] }
+      }],
+      graphic: any ? [] : [{
+        type: 'text',
+        left: 'center',
+        top: 'middle',
+        style: {
+          text: '填写“完成并发货”数据后自动生成图表',
+          fill: '#9aa4ae',
+          fontSize: 12.5
+        }
+      }]
     }, { notMerge: true });
   }
-  function saveToCloud() {
-    if (!TOKEN) return;
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(async function() {
-      try {
-        setStatus('正在同步...', '');
-        db.dates[dateInput.value] = collectData();
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(db))));
-        const res = await fetch(API_URL, {
-          method: 'PUT',
-          headers: {
-            'Authorization': 'token ' + TOKEN,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            message: 'auto update: ' + new Date().toLocaleString(),
-            content: content,
-            sha: dataSha,
-            branch: BRANCH
-          })
-        });
-        const resJson = await res.json();
-        if (resJson.sha) dataSha = resJson.sha;
-        setStatus('已自动同步 ' + dateInput.value + ' 数据', 'ok');
-      } catch(e) {
-        console.log('自动保存失败', e);
-        setStatus('同步失败，重试中...', 'err');
-      }
-    }, 800);
-  }
-  async function loadFromCloud() {
-    try {
-      setStatus('加载中...', '');
-      const res = await fetch(RAW_URL + '?t=' + Date.now());
-      const resObj = await res.json();
-      if (resObj && resObj.dates) db = resObj;
-      if (TOKEN) {
-        try {
-          const metaRes = await fetch(API_URL, {
-            headers: { 'Authorization': 'token ' + TOKEN, 'Accept': 'application/vnd.github.v3+json' }
-          });
-          const meta = await metaRes.json();
-          if (meta.sha) dataSha = meta.sha;
-        } catch(e) {}
-      }
-      const today = dateInput.value;
-      if (db.dates[today]) {
-        applyData(db.dates[today]);
-        setStatus(TOKEN ? '已加载 ' + today + ' 数据，自动同步已开启' : '已加载 ' + today + ' 数据（仅查看模式）', 'ok');
-      } else {
-        applyData({});
-        setStatus(TOKEN ? today + ' 新一天，填完自动同步' : today + ' 新一天（仅查看模式）', 'ok');
-      }
-      if (!TOKEN) {
-        setTimeout(function() {
-          const t = prompt('第一次打开请粘贴你的GitHub访问令牌，开启自动同步：');
-          if (t && t.trim()) {
-            TOKEN = t.trim();
-            localStorage.setItem('gh_token', TOKEN);
-            location.reload();
-          }
-        }, 1000);
-      }
-    } catch(e) {
-      console.log('加载失败', e);
-      setStatus('加载失败，刷新重试', 'err');
-      applyData({});
-    }
-  }
+
+  /* ===== 事件 ===== */
   document.querySelectorAll('input.cell').forEach(function (inp) {
     inp.addEventListener('input', function () {
       recalc();
-      saveToCloud();
+      scheduleSave();
     });
   });
-  noteInput.addEventListener('input', function() { recalc(); saveToCloud(); });
+  noteInput.addEventListener('input', scheduleSave);
+
   dateInput.addEventListener('change', function () {
-    const selectedDate = dateInput.value;
-    saveToCloud();
-    setTimeout(function() {
-      if (db.dates[selectedDate]) {
-        applyData(db.dates[selectedDate]);
-        setStatus('已加载 ' + selectedDate + ' 数据', 'ok');
-      } else {
-        applyData({});
-        setStatus(selectedDate + ' 新一天，填完自动同步', 'ok');
-      }
-    }, 500);
+    var next = dateInput.value;
+    if (!next) return;
+    clearTimeout(saveTimer2);
+    var oldDate = prevDate;
+    var doSwitch = function () {
+      prevDate = next;
+      applyData(db.dates[next] || {});
+      refreshHistory();
+      historySelect.value = '';
+    };
+    if (fileHandle) {
+      writeToFile(oldDate).then(function (ok) { if (ok) flashSaved(); }).finally(doSwitch);
+    } else {
+      db.dates[oldDate] = collectData();
+      doSwitch();
+    }
   });
-  loadFromCloud();
+
+  historySelect.addEventListener('change', function () {
+    var d = historySelect.value;
+    if (!d) return;
+    clearTimeout(saveTimer2);
+    var doSwitch = function () {
+      dateInput.value = d;
+      prevDate = d;
+      applyData(db.dates[d] || {});
+    };
+    if (fileHandle) {
+      writeToFile().then(function (ok) { if (ok) flashSaved(); }).finally(doSwitch);
+    } else {
+      db.dates[prevDate] = collectData();
+      doSwitch();
+    }
+  });
+
+  document.getElementById('btnOpen').addEventListener('click', openDataFile);
+  document.getElementById('btnNew').addEventListener('click', newDataFile);
+  if (hasFSA) {
+    fallbackRow.style.display = 'none';
+  } else {
+    document.getElementById('btnOpen').style.display = 'none';
+    document.getElementById('btnNew').style.display = 'none';
+    fallbackRow.style.display = 'flex';
+    setStatus('当前浏览器不支持文件直读，请用导入/导出', 'err');
+  }
+  document.getElementById('btnImport').addEventListener('click', function () { importInput.click(); });
+  document.getElementById('btnExport').addEventListener('click', exportData);
+
+  /* ===== 初始化 ===== */
+  prevDate = dateInput.value;
+  applyData({});
+  refreshHistory();
 })();
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
